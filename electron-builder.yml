@@ -1,0 +1,29 @@
+appId: com.remotedock.app
+productName: RemoteDock
+directories:
+  buildResources: build
+  output: release
+files:
+  - out/**
+  - package.json
+asarUnpack:
+  - "**/*.node"
+extraResources:
+  - from: resources/adb
+    to: adb
+    filter: ["**/*"]
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: build/icon.png
+nsis:
+  oneClick: true
+  perMachine: false
+  allowToChangeInstallationDirectory: false
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: RemoteDock
+  runAfterFinish: true
+  deleteAppDataOnUninstall: false
+  artifactName: ${productName}-Setup-${version}.${ext}

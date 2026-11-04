@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build and distribution outputs
+out/
+dist/
+release/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Logs
+*.log
+dev.*
+
+# Temporary artifacts
+200
+300
+500
+PLAN.md
+plan.md
+
+# Downloaded binaries (fetched via npm postinstall)
+resources/adb/
+
+# OS metadata
+.DS_Store
+Thumbs.db
