@@ -6,6 +6,7 @@ import { Toasts } from './components/Toasts'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { PromptDialog } from './components/PromptDialog'
 import { HostKeyDialog } from './components/HostKeyDialog'
+import { PreviewDialog } from './components/PreviewDialog'
 import { DevicesPage } from './pages/DevicesPage'
 import { ExplorerPage } from './pages/ExplorerPage'
 import { SettingsPage } from './pages/SettingsPage'
@@ -45,6 +46,7 @@ export default function App(): React.JSX.Element {
       <ConfirmDialog />
       <PromptDialog />
       <HostKeyDialog />
+      <PreviewDialog />
     </div>
   )
 }

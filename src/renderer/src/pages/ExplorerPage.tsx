@@ -4,6 +4,7 @@ import {
   ChevronRight,
   Copy,
   Download,
+  Eye,
   FolderInput,
   FolderOpen,
   FolderPlus,
@@ -30,6 +31,7 @@ interface MenuState {
 export function ExplorerPage(): React.JSX.Element {
   const settings = useAppStore((state) => state.settings)
   const activeDeviceId = useAppStore((state) => state.activeDeviceId)
+  const openPreview = useAppStore((state) => state.openPreview)
 
   const deviceId = useExplorerStore((state) => state.deviceId)
   const path = useExplorerStore((state) => state.path)
@@ -48,7 +50,6 @@ export function ExplorerPage(): React.JSX.Element {
   const setSort = useExplorerStore((state) => state.setSort)
   const downloadSelected = useExplorerStore((state) => state.downloadSelected)
   const downloadTo = useExplorerStore((state) => state.downloadTo)
-  const downloadEntry = useExplorerStore((state) => state.downloadEntry)
   const newFolder = useExplorerStore((state) => state.newFolder)
   const renameSelected = useExplorerStore((state) => state.renameSelected)
   const deleteSelected = useExplorerStore((state) => state.deleteSelected)
@@ -74,9 +75,9 @@ export function ExplorerPage(): React.JSX.Element {
   const openEntry = useCallback(
     (entry: FileEntry) => {
       if (entry.isDir) void navigate(entry.path)
-      else void downloadEntry(entry)
+      else openPreview(entry)
     },
-    [downloadEntry, navigate]
+    [navigate, openPreview]
   )
 
   const ensureSelected = useCallback(
@@ -91,8 +92,8 @@ export function ExplorerPage(): React.JSX.Element {
       const multi = selection.length > 1 && selection.includes(entry.path)
       return [
         {
-          label: entry.isDir ? 'Open' : 'Download',
-          icon: entry.isDir ? FolderOpen : Download,
+          label: entry.isDir ? 'Open folder' : 'Preview',
+          icon: entry.isDir ? FolderOpen : Eye,
           onClick: () => openEntry(entry)
         },
         {
@@ -255,6 +256,7 @@ export function ExplorerPage(): React.JSX.Element {
             </div>
           ) : (settings.view ?? 'list') === 'grid' ? (
             <FileGrid
+              deviceId={deviceId}
               entries={visible}
               selection={selection}
               anchor={anchor}

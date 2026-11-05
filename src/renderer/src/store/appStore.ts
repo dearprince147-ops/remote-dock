@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Device, HostKeyPrompt, Settings } from '@shared/types'
+import type { Device, FileEntry, HostKeyPrompt, Settings } from '@shared/types'
 import { api, errorMessage } from '../lib/api'
 import { applyAccent } from '../lib/accent'
 
@@ -52,9 +52,12 @@ interface AppState {
   prompt: PromptState | null
   hostPrompt: HostKeyPrompt | null
   hostQueue: HostKeyPrompt[]
+  preview: FileEntry | null
 
   setView(view: View): void
   openDevice(id: string): void
+  openPreview(entry: FileEntry): void
+  closePreview(): void
   refreshDevices(): Promise<void>
   updateSettings(patch: Partial<Settings>): Promise<Settings | null>
   pushToast(kind: ToastKind, message: string): void
@@ -81,10 +84,15 @@ export const useAppStore = create<AppState>((set, get) => ({
   prompt: null,
   hostPrompt: null,
   hostQueue: [],
+  preview: null,
 
-  setView: (view) => set({ view }),
+  setView: (view) => set({ view, preview: null }),
 
-  openDevice: (id) => set({ activeDeviceId: id, view: 'explorer' }),
+  openDevice: (id) => set({ activeDeviceId: id, view: 'explorer', preview: null }),
+
+  openPreview: (entry) => set({ preview: entry }),
+
+  closePreview: () => set({ preview: null }),
 
   refreshDevices: async () => {
     try {

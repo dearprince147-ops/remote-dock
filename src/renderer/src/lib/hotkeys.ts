@@ -20,6 +20,10 @@ export function installHotkeys(): () => void {
 
     if (event.key === 'Escape') {
       if (app.dialog || app.prompt || app.hostPrompt) return
+      if (app.preview) {
+        app.closePreview()
+        return
+      }
       if (useTransferStore.getState().drawerOpen) {
         useTransferStore.getState().setDrawerOpen(false)
         return
@@ -35,6 +39,7 @@ export function installHotkeys(): () => void {
       return
     }
 
+    if (app.preview) return
     if (isTyping(event.target)) return
     if (event.key === 'F11') return
 

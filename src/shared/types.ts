@@ -128,6 +128,13 @@ export interface Settings {
   speedUnit: 'bytes' | 'bits'
 }
 
+export interface TextPreview {
+  text: string
+  size: number
+  truncated: boolean
+  binary: boolean
+}
+
 export interface HostKeyPrompt {
   requestId: string
   host: string

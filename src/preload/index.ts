@@ -29,7 +29,8 @@ const api: RemoteDockApi = {
     list: (deviceId, path) => ipcRenderer.invoke(IPC.fsList, deviceId, path),
     mkdir: (deviceId, path) => ipcRenderer.invoke(IPC.fsMkdir, deviceId, path),
     rename: (deviceId, from, to) => ipcRenderer.invoke(IPC.fsRename, deviceId, from, to),
-    delete: (deviceId, path, isDir) => ipcRenderer.invoke(IPC.fsDelete, deviceId, path, isDir)
+    delete: (deviceId, path, isDir) => ipcRenderer.invoke(IPC.fsDelete, deviceId, path, isDir),
+    readText: (deviceId, path, maxBytes) => ipcRenderer.invoke(IPC.fsReadText, deviceId, path, maxBytes)
   },
   transfers: {
     list: () => ipcRenderer.invoke(IPC.transfersList),

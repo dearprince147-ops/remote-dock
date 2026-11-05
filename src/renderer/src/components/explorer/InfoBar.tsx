@@ -28,7 +28,7 @@ export function InfoBar(): React.JSX.Element {
         </>
       )}
       <span className="info-spacer" />
-      <span className="info-hint">Double-click to open · Right-click for actions</span>
+      <span className="info-hint">Double-click to preview · Right-click for actions</span>
     </div>
   )
 }

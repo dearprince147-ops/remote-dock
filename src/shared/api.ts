@@ -8,6 +8,7 @@ import type {
   SavedConnection,
   Settings,
   SshConfig,
+  TextPreview,
   Transfer,
   TransferSnapshot
 } from './types'
@@ -32,6 +33,7 @@ export interface RemoteDockApi {
     mkdir(deviceId: string, path: string): Promise<void>
     rename(deviceId: string, from: string, to: string): Promise<void>
     delete(deviceId: string, path: string, isDir: boolean): Promise<void>
+    readText(deviceId: string, path: string, maxBytes?: number): Promise<TextPreview>
   }
   transfers: {
     list(): Promise<TransferSnapshot>

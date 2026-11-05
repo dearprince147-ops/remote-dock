@@ -1,11 +1,25 @@
-import { app, Menu, nativeTheme } from 'electron'
+import { app, Menu, nativeTheme, protocol } from 'electron'
 import { getSettings } from './settings'
 import { createMainWindow, getMainWindow } from './window'
 import { setupIpc, type Services } from './ipc'
 import { startAdbServer } from './devices/adbBinary'
+import { PREVIEW_SCHEME } from './devices/preview'
 
 let services: Services | null = null
 let quitting = false
+
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: PREVIEW_SCHEME,
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      stream: true,
+      bypassCSP: true
+    }
+  }
+])
 
 // Dev-only: exposes the Chrome DevTools protocol for UI debugging.
 if (!app.isPackaged) {

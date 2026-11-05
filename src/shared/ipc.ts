@@ -15,6 +15,7 @@ export const IPC = {
   fsMkdir: 'fs:mkdir',
   fsRename: 'fs:rename',
   fsDelete: 'fs:delete',
+  fsReadText: 'fs:readText',
 
   transfersList: 'transfers:list',
   transfersDownload: 'transfers:download',

@@ -8,6 +8,7 @@ import { DeviceManager } from './devices/deviceManager'
 import { TransferManager } from './transfers/transferManager'
 import { adbVersion, resolveAdbPath, resetAdbPathCache } from './devices/adbBinary'
 import { listHosts, removeHost } from './devices/hostKeys'
+import { readTextPreview, registerPreviewProtocol } from './devices/preview'
 import { configFromSaved, deleteSaved, listSaved, saveFromConfig, saveSaved } from './savedConnections'
 
 export interface Services {
@@ -52,6 +53,7 @@ export function setupIpc(): Services {
 
   const deviceManager = new DeviceManager({ getSettings, promptHostKey })
   const transferManager = new TransferManager(deviceManager, getSettings)
+  registerPreviewProtocol(deviceManager)
 
   deviceManager.on('devices', (devices) => broadcast(IPC.devicesEvent, devices))
   transferManager.on('update', (snapshot) => broadcast(IPC.transfersUpdate, snapshot))
@@ -89,6 +91,13 @@ export function setupIpc(): Services {
   ipcMain.handle(IPC.fsDelete, async (_event, id: string, path: string, isDir: boolean) => {
     await deviceManager.provider(deviceId(id)).remove(str(path, 'Path'), Boolean(isDir))
   })
+  ipcMain.handle(IPC.fsReadText, async (_event, id: string, path: string, maxBytes?: number) =>
+    readTextPreview(
+      deviceManager.provider(deviceId(id)),
+      str(path, 'Path'),
+      typeof maxBytes === 'number' ? maxBytes : undefined
+    )
+  )
 
   ipcMain.handle(IPC.transfersList, () => transferManager.snapshot())
   ipcMain.handle(IPC.transfersDownload, async (_event, id: string, entries: FileEntry[], localDir?: string) => {
