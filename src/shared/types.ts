@@ -133,6 +133,19 @@ export interface TextPreview {
   size: number
   truncated: boolean
   binary: boolean
+  bom: boolean
+  newline: 'lf' | 'crlf'
+}
+
+export interface FileBytes {
+  data: Uint8Array
+  size: number
+  truncated: boolean
+}
+
+export interface FileWriteResult {
+  size: number
+  mtime: number
 }
 
 export interface HostKeyPrompt {

@@ -1,10 +1,11 @@
 import type { FileEntry } from './types'
 
-export type PreviewKind = 'image' | 'video' | 'audio' | 'text' | 'binary'
+export type PreviewKind = 'image' | 'video' | 'audio' | 'pdf' | 'text' | 'binary'
 
 const IMAGE = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'ico', 'svg', 'avif', 'heic', 'heif', 'tif', 'tiff'])
 const VIDEO = new Set(['mp4', 'm4v', 'webm', 'ogv', 'mov', 'avi', 'mkv', '3gp', '3g2', 'ts', 'm2ts', 'flv', 'wmv'])
 const AUDIO = new Set(['mp3', 'wav', 'flac', 'ogg', 'oga', 'm4a', 'aac', 'opus', 'wma'])
+const PDF = new Set(['pdf'])
 const TEXT = new Set([
   'txt',
   'text',
@@ -78,7 +79,6 @@ const BINARY = new Set([
   'wasm',
   'so',
   'dylib',
-  'pdf',
   'doc',
   'docx',
   'xls',
@@ -106,6 +106,7 @@ export function previewKind(entry: FileEntry): PreviewKind {
   if (IMAGE.has(ext)) return 'image'
   if (VIDEO.has(ext)) return 'video'
   if (AUDIO.has(ext)) return 'audio'
+  if (PDF.has(ext)) return 'pdf'
   if (TEXT.has(ext) || TEXT_NAMES.has(base)) return 'text'
   if (BINARY.has(ext)) return 'binary'
   return 'text'

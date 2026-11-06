@@ -44,6 +44,7 @@ interface AppState {
   settings: Settings | null
   devices: Device[]
   view: View
+  settingsReturnView: 'devices' | 'explorer'
   activeDeviceId: string | null
   fullscreen: boolean
   toasts: Toast[]
@@ -55,6 +56,8 @@ interface AppState {
   preview: FileEntry | null
 
   setView(view: View): void
+  openSettings(): void
+  closeSettings(): void
   openDevice(id: string): void
   openPreview(entry: FileEntry): void
   closePreview(): void
@@ -76,6 +79,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   settings: null,
   devices: [],
   view: 'devices',
+  settingsReturnView: 'devices',
   activeDeviceId: null,
   fullscreen: false,
   toasts: [],
@@ -87,6 +91,18 @@ export const useAppStore = create<AppState>((set, get) => ({
   preview: null,
 
   setView: (view) => set({ view, preview: null }),
+
+  openSettings: () => {
+    const current = get().view
+    if (current === 'settings') return
+    set({ settingsReturnView: current, view: 'settings', preview: null })
+  },
+
+  closeSettings: () => {
+    const target = get().settingsReturnView
+    const canReturnToExplorer = target === 'explorer' && Boolean(get().activeDeviceId)
+    set({ view: canReturnToExplorer ? 'explorer' : 'devices', preview: null })
+  },
 
   openDevice: (id) => set({ activeDeviceId: id, view: 'explorer', preview: null }),
 

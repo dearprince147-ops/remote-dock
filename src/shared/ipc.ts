@@ -16,6 +16,8 @@ export const IPC = {
   fsRename: 'fs:rename',
   fsDelete: 'fs:delete',
   fsReadText: 'fs:readText',
+  fsReadBytes: 'fs:readBytes',
+  fsWriteText: 'fs:writeText',
 
   transfersList: 'transfers:list',
   transfersDownload: 'transfers:download',

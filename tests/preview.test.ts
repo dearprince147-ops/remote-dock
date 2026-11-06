@@ -18,6 +18,7 @@ describe('preview helpers', () => {
     expect(previewKind(entry('photo.jpg'))).toBe('image')
     expect(previewKind(entry('clip.mp4'))).toBe('video')
     expect(previewKind(entry('song.mp3'))).toBe('audio')
+    expect(previewKind(entry('manual.PDF'))).toBe('pdf')
     expect(previewKind(entry('README.md'))).toBe('text')
     expect(previewKind(entry('notes.log'))).toBe('text')
     expect(previewKind(entry('.gitignore'))).toBe('text')

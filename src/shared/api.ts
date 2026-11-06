@@ -1,7 +1,9 @@
 import type {
   AdbConnectConfig,
   Device,
+  FileBytes,
   FileEntry,
+  FileWriteResult,
   HostKeyPrompt,
   KnownHost,
   QuickLink,
@@ -34,6 +36,13 @@ export interface RemoteDockApi {
     rename(deviceId: string, from: string, to: string): Promise<void>
     delete(deviceId: string, path: string, isDir: boolean): Promise<void>
     readText(deviceId: string, path: string, maxBytes?: number): Promise<TextPreview>
+    readBytes(deviceId: string, path: string, maxBytes?: number): Promise<FileBytes>
+    writeText(
+      deviceId: string,
+      path: string,
+      content: string,
+      expectedMtime?: number
+    ): Promise<FileWriteResult>
   }
   transfers: {
     list(): Promise<TransferSnapshot>

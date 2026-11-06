@@ -28,6 +28,10 @@ export function installHotkeys(): () => void {
         useTransferStore.getState().setDrawerOpen(false)
         return
       }
+      if (app.view === 'settings') {
+        app.closeSettings()
+        return
+      }
       if (explorer.selection.length) {
         explorer.clearSelection()
         return
@@ -49,7 +53,7 @@ export function installHotkeys(): () => void {
     if (app.view !== 'explorer') {
       if (mod && event.key === ',') {
         event.preventDefault()
-        app.setView('settings')
+        app.openSettings()
       }
       return
     }
@@ -101,7 +105,7 @@ export function installHotkeys(): () => void {
     }
     if (mod && event.key === ',') {
       event.preventDefault()
-      app.setView('settings')
+      app.openSettings()
       return
     }
     if (event.key === 'Backspace' || (event.altKey && event.key === 'ArrowUp')) {

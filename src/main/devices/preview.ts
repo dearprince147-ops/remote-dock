@@ -1,7 +1,7 @@
 import { nativeImage, protocol } from 'electron'
 import { Readable } from 'node:stream'
 import path from 'node:path'
-import type { TextPreview } from '@shared/types'
+import type { FileBytes, FileWriteResult, TextPreview } from '@shared/types'
 import type { FileProvider } from './provider'
 
 export const PREVIEW_SCHEME = 'remotedock-preview'
@@ -97,8 +97,13 @@ const TEXT_MIME: Record<string, string> = {
   svg: 'text/xml; charset=utf-8',
   gitignore: 'text/plain; charset=utf-8',
   dockerfile: 'text/plain; charset=utf-8',
-  makefile: 'text/plain; charset=utf-8'
+  makefile: 'text/plain; charset=utf-8',
+  pdf: 'application/pdf'
 }
+
+const MAX_TEXT_BYTES = 4 * 1024 * 1024
+const MAX_WRITE_BYTES = 8 * 1024 * 1024
+const MAX_BINARY_PREVIEW_BYTES = 64 * 1024 * 1024
 
 export function mimeTypeFor(name: string): string {
   const base = path.posix.basename(name).toLowerCase()
@@ -147,11 +152,12 @@ export async function readTextPreview(
   const entry = await provider.stat(target)
   if (!entry) throw new Error('File not found on the device')
   if (entry.isDir) throw new Error('Folders cannot be previewed as text')
-  const limit = Math.min(Math.max(1, Math.floor(maxBytes)), 4 * 1024 * 1024)
+  const limit = Math.min(Math.max(1, Math.floor(maxBytes)), MAX_TEXT_BYTES)
   const size = Math.max(0, entry.size)
   const stream = await provider.openRead(target, 0)
   const { buffer, truncated } = await readPrefix(stream, Math.min(limit, size))
   const binary = buffer.includes(0)
+  const bom = buffer.length >= 3 && buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf
   let text = ''
   if (!binary) {
     text = buffer.toString('utf8')
@@ -161,8 +167,72 @@ export async function readTextPreview(
     text,
     size,
     truncated: truncated || buffer.length < size,
-    binary
+    binary,
+    bom,
+    newline: text.includes('\r\n') ? 'crlf' : 'lf'
   }
+}
+
+export async function readBinaryPreview(
+  provider: FileProvider,
+  target: string,
+  maxBytes = MAX_BINARY_PREVIEW_BYTES
+): Promise<FileBytes> {
+  const entry = await provider.stat(target)
+  if (!entry) throw new Error('File not found on the device')
+  if (entry.isDir) throw new Error('Folders cannot be previewed')
+  const limit = Math.min(Math.max(1, Math.floor(maxBytes)), 128 * 1024 * 1024)
+  const size = Math.max(0, entry.size)
+  const stream = await provider.openRead(target, 0)
+  const { buffer, truncated } = await readPrefix(stream, Math.min(limit, size))
+  return {
+    data: new Uint8Array(buffer),
+    size,
+    truncated: truncated || buffer.length < size
+  }
+}
+
+export async function writeTextFile(
+  provider: FileProvider,
+  target: string,
+  content: string,
+  expectedMtime?: number
+): Promise<FileWriteResult> {
+  if (typeof content !== 'string') throw new Error('Text content is required')
+  const data = Buffer.from(content, 'utf8')
+  if (data.length > MAX_WRITE_BYTES) {
+    throw new Error('File is too large to save from the editor (maximum 8 MB)')
+  }
+  const entry = await provider.stat(target)
+  if (!entry) throw new Error('File not found on the device')
+  if (entry.isDir) throw new Error('Folders cannot be edited')
+  if (
+    typeof expectedMtime === 'number' &&
+    expectedMtime > 0 &&
+    Math.abs(entry.mtime - expectedMtime) > 2000
+  ) {
+    throw new Error('This file changed on the device since it was opened. Reopen it before saving.')
+  }
+  const stream = await provider.openWrite(target, 0)
+  await new Promise<void>((resolve, reject) => {
+    let settled = false
+    const finish = (error?: Error): void => {
+      if (settled) return
+      settled = true
+      if (error) reject(error)
+      else resolve()
+    }
+    stream.once('error', finish)
+    stream.once('finish', () => finish())
+    stream.once('close', () => finish())
+    try {
+      stream.end(data)
+    } catch (error) {
+      finish(error instanceof Error ? error : new Error(String(error)))
+    }
+  })
+  const next = await provider.stat(target)
+  return { size: next?.size ?? data.length, mtime: next?.mtime ?? Date.now() }
 }
 
 const THUMB_WIDTH = 320

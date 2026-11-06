@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   ArrowDownUp,
+  ArrowLeft,
   Check,
   FolderCog,
   Info,
@@ -30,6 +31,8 @@ export function SettingsPage(): React.JSX.Element {
   const settings = useAppStore((state) => state.settings)
   const update = useAppStore((state) => state.updateSettings)
   const toast = useAppStore((state) => state.pushToast)
+  const closeSettings = useAppStore((state) => state.closeSettings)
+  const settingsReturnView = useAppStore((state) => state.settingsReturnView)
 
   const [section, setSection] = useState<Section>('appearance')
   const [knownHosts, setKnownHosts] = useState<KnownHost[]>([])
@@ -89,6 +92,10 @@ export function SettingsPage(): React.JSX.Element {
           <h1>Settings</h1>
           <p>Changes apply immediately and are stored on this machine.</p>
         </div>
+        <button className="btn btn-sm" onClick={closeSettings}>
+          <ArrowLeft size={14} />
+          {settingsReturnView === 'explorer' ? 'Back to explorer' : 'Back to devices'}
+        </button>
       </div>
 
       <div className="settings-layout">

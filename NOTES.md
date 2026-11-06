@@ -27,7 +27,29 @@ Deviations and implementation decisions made while building per PLAN.md.
 - Double-click on a file opens the preview dialog; folder double-click still navigates. The context menu keeps a
   separate Download action. No transfer is created by previewing.
 
+## 1.0.3 preview and editing improvements
+
+- Image previews now measure the natural image size and the viewport, then start at a fit-to-window scale
+  instead of using CSS `object-fit` against a fixed thumbnail. Zoom is expressed relative to that fit scale,
+  with `Ctrl + scroll`, +/- buttons, double-click reset, and drag-to-pan once the image is larger than the viewport.
+- Video previews use a sized flex stage and `object-fit: contain` with an explicit `height: 100%`, so portrait
+  videos are letterboxed to the available preview area instead of being cropped or scaled to the element box.
+- Text editing is local UI state until **Save**. The initial preview still reads only 512 KB; entering edit mode
+  re-reads up to 4 MB so truncated previews can be edited. Binary files and files above 4 MB stay read-only.
+- Saves preserve a UTF-8 BOM and the original newline style. The main process checks the file's mtime against the
+  listing mtime (2 second tolerance) before writing, then re-stats the file to return the new size and mtime.
+- `writeTextFile` resolves on either `finish` or `close`; `ssh2` write streams in this Electron build emit `close`
+  without emitting `finish`, while the ADB writable emits `finish`.
+- PDF previews use `pdfjs-dist` and bundle the worker through Vite's `?url` import. PDF bytes come through the
+  typed IPC bridge (`fs:readBytes`) with a 64 MB preview cap to avoid custom-protocol fetch/CORS issues.
+- PDF pages are rendered to a canvas at device pixel ratio, capped at 16 million backing pixels. The viewer
+  supports page navigation, zoom, and fit-to-window.
+- Settings remembers whether it was opened from Devices or Explorer. `closeSettings` restores the previous view
+  and leaves the active device, path, selection, and history untouched, so no reconnect is needed.
+- Text save is an explicit action; preview downloads are still the only path that writes to local disk.
+
 ## Builds
 
 - 1.0.0: initial NSIS installer at `release/RemoteDock-Setup-1.0.0.exe`.
 - 1.0.2: preview and thumbnail release at `release/RemoteDock-Setup-1.0.2.exe`.
+- 1.0.3: zoom/edit/PDF preview release at `release/RemoteDock-Setup-1.0.3.exe`.

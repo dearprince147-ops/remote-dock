@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.0.2-brightgreen.svg" alt="Version 1.0.2" />
+  <img src="https://img.shields.io/badge/version-1.0.3-brightgreen.svg" alt="Version 1.0.3" />
   <img src="https://img.shields.io/badge/platform-Windows-blue.svg" alt="Platform" />
   <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" />
   <img src="https://img.shields.io/badge/Electron-45-informational.svg" alt="Electron" />
@@ -19,34 +19,29 @@
 
 ---
 
-## What's new in 1.0.2
+## What's new in 1.0.3
 
-### In-app file previews
+### Better previews
 
-Double-clicking a file no longer starts a download. It opens a preview window instead:
+- **Images** now fit the preview window instead of being cropped. Use the zoom controls, `Ctrl + scroll`, or double-click to inspect details, and drag to pan while zoomed in.
+- **Text files are editable in place.** Click **Edit**, make changes, then press `Ctrl + S` or **Save**. Saves preserve UTF-8 BOM and the file's existing CRLF/LF line endings, and warn you if the file changed on the device while you were editing.
+- **PDF files** open in a built-in viewer with page navigation, zoom controls, and fit-to-window rendering. PDFs up to 64 MB can be previewed.
+- **Video previews** now letterbox to fit the window, so vertical phone clips are shown in full instead of being cropped or zoomed. Audio previews keep their existing streaming behavior.
 
-- **Images** (JPG, PNG, GIF, WebP, BMP, AVIF, SVG and more) render directly in the app.
-- **Videos** (MP4, WebM, MOV, MKV and more, subject to codec support) play in a native video player with seeking.
-- **Audio** files play in an inline audio player.
-- **Text files** (TXT, Markdown, JSON, logs, source code, config files, CSV and more) open in a readable monospace view with Unicode support.
-- **Unsupported or binary files** show a clear message instead of opening a download.
+### Settings keeps your place
 
-Everything is streamed on demand from the remote device. A preview never creates a transfer, never writes to your Downloads folder, and never leaves a `.part` file. The preview footer always offers an explicit **Download** button if you do want to save the file.
+Opening Settings from the explorer and clicking **Back to explorer** (or pressing `Esc`) returns to the same device, folder, selection, and history without reconnecting.
 
-### Grid thumbnails
+### Also included
 
-Grid view now shows real thumbnails:
-
-- **Images** are resized on demand in the main process and cached in memory, so large photo folders stay responsive.
-- **Videos** show their first frame using the built-in media pipeline.
-- Unsupported images or codecs fall back to the normal file icon.
-- Thumbnails are served through a private `remotedock-preview://` stream that supports HTTP range requests, so video seeking works without buffering the entire file.
-
-### Also included in this release
-
-- Clearer SSH connection errors for missing key files, wrong passphrases, invalid key formats, host-key failures, and key-exchange problems.
-- `~` expansion for SSH private-key paths.
+- The preview dialog now has clear Save/Cancel actions and unsaved-change protection.
+- Files larger than 4 MB stay read-only in the text preview; files larger than 8 MB are rejected by the save guard.
 - Existing transfer, queue, resume, hash-verification, settings, and saved-connection features are unchanged.
+
+### From 1.0.2
+
+- In-app previews for images, video, audio, and text, plus real image/video thumbnails in grid view.
+- Clearer SSH connection errors and `~` expansion for private-key paths.
 
 ---
 
@@ -86,8 +81,10 @@ RemoteDock uses a custom Electron protocol (`remotedock-preview://`) registered 
 - The main process looks up the connected provider, verifies the file, and streams it back in chunks.
 - `Range` requests are honored for video playback and seeking.
 - Image thumbnails are generated with Electron's native image pipeline and cached in memory (up to 240 entries).
-- Text previews read only the first 512 KB and report when the file was truncated.
-- Nothing is written to local disk during preview. The only way a file is saved is through the explicit **Download** action.
+- Image previews start fit-to-window and support zoom, panning, and `Ctrl + scroll`.
+- Text previews read the first 512 KB initially and report when the file was truncated. Opening the editor loads up to 4 MB.
+- PDF previews read the file through the typed IPC bridge (up to 64 MB) and render pages locally with PDF.js.
+- Nothing is written to local disk during preview. Text edits are written only after an explicit **Save**; downloads happen only through **Download**.
 
 ---
 
@@ -135,7 +132,7 @@ RemoteDock uses a custom Electron protocol (`remotedock-preview://`) registered 
 ### Option A: Install the setup executable (recommended)
 
 1. Open the **[Releases](https://github.com/dearprince147-ops/remote-dock/releases)** tab.
-2. Download `RemoteDock-Setup-1.0.2.exe`.
+2. Download `RemoteDock-Setup-1.0.3.exe`.
 3. Run the installer. It upgrades an existing RemoteDock installation in place and keeps your settings, known hosts, and saved connections.
 
 ### Option B: Run from source
@@ -198,7 +195,7 @@ The NSIS installer is written to `release/RemoteDock-Setup-<version>.exe`.
 
 - **Sandboxed renderer:** the UI has no Node.js access. All filesystem and device operations go through a typed preload IPC bridge.
 - **Streaming transfers:** files move in controlled 256 KB chunks, so large transfers do not buffer whole files in memory.
-- **Streaming previews:** media is served through a registered custom protocol with range support; text previews are capped at 512 KB.
+- **Streaming previews:** media is served through a registered custom protocol with range support; text previews load 512 KB initially, editing loads up to 4 MB, and PDF previews use a 64 MB IPC cap.
 - **Encrypted secrets:** stored SSH passwords and passphrases are encrypted with the OS key store.
 - **Host-key verification:** SHA-256 fingerprints are stored per host and checked on every SSH connection.
 
@@ -220,7 +217,9 @@ The NSIS installer is written to `release/RemoteDock-Setup-<version>.exe`.
 | `Backspace` / `Alt + Up` | Go to the parent folder |
 | `Alt + Left` / `Alt + Right` | Navigate history |
 | `Ctrl + F` | Filter the current folder |
-| `Esc` | Close the preview or clear the selection |
+| `Ctrl + S` | Save changes while editing a text preview |
+| `Ctrl + scroll` | Zoom an image preview |
+| `Esc` | Close the preview, leave Settings, or clear the selection |
 
 ---
 
@@ -231,6 +230,7 @@ The NSIS installer is written to `release/RemoteDock-Setup-<version>.exe`.
 - **State management:** [Zustand 5](https://github.com/pmndrs/zustand)
 - **Virtualization:** [@tanstack/react-virtual](https://tanstack.com/virtual/latest)
 - **Icons:** [Lucide](https://lucide.dev/)
+- **PDF rendering:** [PDF.js](https://mozilla.github.io/pdf.js/)
 - **SSH and SFTP:** [ssh2](https://github.com/mscdex/ssh2)
 - **Packaging:** [electron-builder](https://www.electron.build/) (NSIS x64)
 

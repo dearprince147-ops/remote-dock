@@ -8,7 +8,7 @@ import { DeviceManager } from './devices/deviceManager'
 import { TransferManager } from './transfers/transferManager'
 import { adbVersion, resolveAdbPath, resetAdbPathCache } from './devices/adbBinary'
 import { listHosts, removeHost } from './devices/hostKeys'
-import { readTextPreview, registerPreviewProtocol } from './devices/preview'
+import { readBinaryPreview, readTextPreview, registerPreviewProtocol, writeTextFile } from './devices/preview'
 import { configFromSaved, deleteSaved, listSaved, saveFromConfig, saveSaved } from './savedConnections'
 
 export interface Services {
@@ -97,6 +97,25 @@ export function setupIpc(): Services {
       str(path, 'Path'),
       typeof maxBytes === 'number' ? maxBytes : undefined
     )
+  )
+  ipcMain.handle(IPC.fsReadBytes, async (_event, id: string, path: string, maxBytes?: number) =>
+    readBinaryPreview(
+      deviceManager.provider(deviceId(id)),
+      str(path, 'Path'),
+      typeof maxBytes === 'number' ? maxBytes : undefined
+    )
+  )
+  ipcMain.handle(
+    IPC.fsWriteText,
+    async (_event, id: string, path: string, content: string, expectedMtime?: number) => {
+      if (typeof content !== 'string') throw new Error('Text content is required')
+      return writeTextFile(
+        deviceManager.provider(deviceId(id)),
+        str(path, 'Path'),
+        content,
+        typeof expectedMtime === 'number' ? expectedMtime : undefined
+      )
+    }
   )
 
   ipcMain.handle(IPC.transfersList, () => transferManager.snapshot())

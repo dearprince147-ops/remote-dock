@@ -16,7 +16,7 @@ const VIDEO = ['mp4', 'mkv', 'mov', 'avi', 'webm', 'm4v', '3gp']
 const AUDIO = ['mp3', 'wav', 'flac', 'ogg', 'm4a', 'aac', 'opus']
 const ARCHIVE = ['zip', 'rar', '7z', 'tar', 'gz', 'xz', 'bz2']
 const CODE = ['js', 'ts', 'tsx', 'jsx', 'json', 'py', 'sh', 'css', 'html', 'xml', 'yml', 'yaml', 'toml', 'rs', 'go', 'java', 'c', 'cpp', 'h']
-const TEXT = ['txt', 'md', 'log', 'conf', 'ini', 'csv']
+const TEXT = ['txt', 'md', 'log', 'conf', 'ini', 'csv', 'pdf']
 
 interface FileIconProps {
   entry: FileEntry

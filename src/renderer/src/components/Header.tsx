@@ -31,6 +31,9 @@ export function Header(): React.JSX.Element {
   const fullscreen = useAppStore((state) => state.fullscreen)
   const settings = useAppStore((state) => state.settings)
   const setView = useAppStore((state) => state.setView)
+  const openSettings = useAppStore((state) => state.openSettings)
+  const closeSettings = useAppStore((state) => state.closeSettings)
+  const settingsReturnView = useAppStore((state) => state.settingsReturnView)
 
   const path = useExplorerStore((state) => state.path)
   const selection = useExplorerStore((state) => state.selection)
@@ -62,6 +65,15 @@ export function Header(): React.JSX.Element {
   return (
     <header className="app-header">
       <div className="header-left">
+        {view === 'settings' && (
+          <button
+            className="icon-btn"
+            onClick={closeSettings}
+            title={settingsReturnView === 'explorer' ? 'Back to explorer' : 'Back to devices'}
+          >
+            <ArrowLeft size={17} />
+          </button>
+        )}
         {view === 'explorer' ? (
           <>
             <button className="icon-btn" onClick={() => setView('devices')} title="Back to devices">
@@ -180,7 +192,7 @@ export function Header(): React.JSX.Element {
         )}
 
         {view !== 'settings' && (
-          <button className="icon-btn" onClick={() => setView('settings')} title="Settings (Ctrl+,)">
+          <button className="icon-btn" onClick={openSettings} title="Settings (Ctrl+,)">
             <Settings size={17} />
           </button>
         )}
